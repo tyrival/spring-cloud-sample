@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.acrel.mybatis.user.dao.UserDAO">
+
+    <resultMap id="userResultMap" type="com.acrel.entity.auth.User">
+        <result property="id" column="id"/>
+        <result property="account" column="account"/>
+        <result property="password" column="password"/>
+        <result property="name" column="name"/>
+        <result property="phone" column="phone"/>
+        <result property="email" column="email"/>
+        <result property="userType" column="user_type" typeHandler="com.acrel.typehandler.EnumTypeHandler"/>
+        <result property="alipayAccount" column="alipay_account"/>
+        <result property="wechatAccount" column="wechat_account"/>
+        <result property="state" column="state" typeHandler="com.acrel.typehandler.EnumTypeHandler"/>
+        <result property="createTime" column="create_time"/>
+        <result property="createUserId" column="create_user_id"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="updateUserId" column="update_user_id"/>
+        <result property="delFlag" column="del_flag" typeHandler="com.acrel.typehandler.EnumTypeHandler"/>
+    </resultMap>
+
+    <sql id="columns">
+        id, account, name, phone, email, user_type, alipay_account, wechat_account, state, create_time, create_user_id,
+         update_time, update_user_id, del_flag, login_failure
+    </sql>
+
+    <insert id="insert">
+        INSERT INTO auth_user (
+            account,
+            password,
+            name,
+            phone,
+            email,
+            user_type,
+            alipay_account,
+            wechat_account,
+            state,
+            create_time,
+            create_user_id,
+            del_flag,
+        )
+        VALUES (
+            #{account},
+            #{password},
+            #{name},
+            #{phone},
+            #{email},
+            #{userType.code},
+            #{alipayAccount},
+            #{wechatAccount},
+            #{state.code},
+            #{createTime},
+            #{createUserId},
+            #{delFlag.code}
+        )
+    </insert>
+
+    <update id="update">
+        UPDATE auth_user
+        <set>
+            <if test="account != null">account = #{account},</if>
+            <if test="password != null">password = #{password},</if>
+            <if test="name != null">name = #{name},</if>
+            <if test="phone != null">phone = #{phone},</if>
+            <if test="email != null">email = #{email},</if>
+            <if test="userType != null">user_type = #{userType.code},</if>
+            <if test="alipayAccount != null">alipay_account = #{alipayAccount},</if>
+            <if test="wechatAccount != null">wechat_account = #{wechatAccount},</if>
+            <if test="state != null">state = #{state.code},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="updateUserId != null">update_user_id = #{updateUserId},</if>
+            <if test="delFlag != null">del_flag = #{delFlag.code},</if>
+            <if test="loginFailure != null">login_failure = #{loginFailure},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete">
+        DELETE
+        FROM auth_user
+        WHERE id = #{id}
+    </delete>
+
+    <select id="get" resultMap="userResultMap">
+        SELECT
+        <include refid="columns"/>
+        FROM auth_user
+        WHERE id = #{id} AND del_flag = 0
+    </select>
+
+    <select id="getPasswordByAccount" resultMap="userResultMap">
+        SELECT account, password
+        FROM auth_user
+        WHERE account = #{account} AND del_flag = 0
+    </select>
+
+    <select id="getByAccount" resultMap="userResultMap">
+        SELECT
+        <include refid="columns"/>
+        FROM auth_user
+        WHERE account = #{account} AND del_flag = 0
+    </select>
+
+    <select id="list" parameterType="com.acrel.entity.auth.User" resultMap="userResultMap">
+        SELECT
+        <include refid="columns"/>
+        FROM auth_user
+        <where>
+            del_flag = 0
+            <if test="name != null and name != ''">AND name LIKE CONCAT('%',#{name},'%')</if>
+        </where>
+        ORDER BY id
+    </select>
+
+    <select id="listByPage" parameterType="com.acrel.entity.auth.User" resultMap="userResultMap">
+        SELECT
+        <include refid="columns"/>
+        FROM auth_user
+        <where>
+            del_flag = 0
+            <if test="name != null and name != ''">AND name LIKE CONCAT('%',#{name},'%')</if>
+        </where>
+        ORDER BY id
+    </select>
+
+</mapper>

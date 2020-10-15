@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.acrel</groupId>
+    <artifactId>service-sample</artifactId>
+    <version>1.0</version>
+    <packaging>jar</packaging>
+
+    <name>service-sample</name>
+    <description></description>
+
+    <parent>
+        <groupId>com.acrel</groupId>
+        <artifactId>spring-cloud-root</artifactId>
+        <version>1.0</version>
+    </parent>
+
+    <dependencies>
+
+        <!-- common -->
+        <dependency>
+            <groupId>com.acrel</groupId>
+            <artifactId>common</artifactId>
+            <version>1.0</version>
+        </dependency>
+
+        <!-- MongoDB -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-mongodb</artifactId>
+            <version>${spring-boot-mongo.version}</version>
+        </dependency>
+
+        <!-- MyBatis -->
+        <dependency>
+            <groupId>org.mybatis.spring.boot</groupId>
+            <artifactId>mybatis-spring-boot-starter</artifactId>
+            <version>${spring-boot-mybatis.version}</version>
+        </dependency>
+
+        <!-- rocketmq-->
+        <dependency>
+            <groupId>org.apache.rocketmq</groupId>
+            <artifactId>rocketmq-spring-boot-starter</artifactId>
+            <version>${rocketmq.version}</version>
+        </dependency>
+
+    </dependencies>
+</project>

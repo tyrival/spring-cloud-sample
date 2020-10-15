@@ -1,0 +1,220 @@
+server:
+  # 项目端口
+  port: 18080
+
+spring:
+  application:
+    # 服务名，横向扩展为集群时使用
+    name: service-sample
+  # 配置文件，默认为dev
+  profiles:
+    active: dev
+  # 文件上传的配置
+  servlet:
+    multipart:
+      # 上传文件时的缓存文件夹
+      location: /usr/local/acrel/tmp
+      enabled: true
+      max-file-size: -1
+      max-request-size: -1
+  # 定时任务配置
+  quartz:
+    job-store-type: jdbc
+    jdbc:
+      # 初始化表结构
+      initialize-schema: always
+    properties:
+      org:
+        quartz:
+          scheduler:
+            instanceId: AUTO
+          jobStore:
+            class: org.quartz.impl.jdbcjobstore.JobStoreTX
+            driverDelegateClass: org.quartz.impl.jdbcjobstore.StdJDBCDelegate
+            useProperties: false
+            tablePrefix: qrtz_
+            misfireThreshold: 60000
+            clusterCheckinInterval: 5000
+            isClustered: true
+          threadPool:
+            class: org.quartz.simpl.SimpleThreadPool
+            threadCount: 10
+            threadPriority: 5
+            threadsInheritContextClassLoaderOfInitializingThread: true
+
+# 拦截器配置
+interceptor:
+  tokenExclude:
+    - /login
+    - /static/**
+
+# 日志输出位置
+logging:
+  file:
+    name: log/service-sample.log
+
+# ============== Mybatis & PageHelper ==============
+mybatis:
+  mapper-locations: classpath:mybatis/mapper/**/*.xml
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+pagehelper:
+  helperDialect: mysql
+  reasonable: true
+  supportMethodsArguments: true
+  params: count=countSql
+
+
+# ============== Netty ==============
+netty:
+  # netty服务端程序监听的端口
+  port: 9000
+  # netty客户端示例中，配置的服务端程序的ip
+  host: localhost
+
+
+
+# ============== 以下配置区分开发环境dev和生产环境prod ==============
+# 生产环境部署时，执行 java -jar service-sample-1.0.jar --spring.profiles.active=prod 表示使用生产环境的配置
+---
+spring:
+  profiles: dev
+  # mysql配置
+  datasource:
+    driverClassName: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://192.168.0.17:3306/spring_sample?useUnicode=true&characterEncoding=utf-8
+    username: root
+    password: Acrel_!@#123
+  # mongo配置
+  # uri: mongodb://用户名:密码@HOST1:PORT1,HOST2:PORT2/数据库名?safe=true&maxPoolSize=500&minPoolSize=10
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/test?safe=true&maxPoolSize=500&minPoolSize=10
+  # redis配置
+  redis:
+    # 模式 single-单机 cluster-集群 sentinel-哨兵
+    mode: cluster
+    database: 0
+    timeout: 3000
+    password: 123456
+#    # 单机模式
+#    host: 127.0.0.1
+#    port: 6379
+#    # 哨兵模式
+#    sentinel:
+#      # 主服务器所在集群名称
+#      master: mymaster
+#      nodes: 10.211.55.9:26379,10.211.55.10:26380,10.211.55.11:26381
+    # cluster模式
+    cluster:
+      nodes: 61.160.66.26:11224,61.160.66.26:11225,61.160.66.26:11226,61.160.66.26:11227,61.160.66.26:11228,61.160.66.26:11229
+    lettuce:
+      pool:
+        max-idle: 50
+        min-idle: 10
+        max-active: 100
+        max-wait: 1000
+    # redisson配置
+    redisson:
+      # 通用参数
+      max-idle: 50
+      min-idle: 10
+      max-active: 100
+      max-wait: 1000
+      conn-timeout: 3000
+      so-timeout: 3000
+      size: 10
+      # 集群模式参数
+      retry-attempts: 3
+      read-mode: SLAVE
+      scan-interval: 1000
+      failed-attempts: 3
+      slave-connection-pool-size: 64
+      master-connection-pool-size: 64
+      retry-interval: 1500
+#      # 哨兵模式参数
+#      master-onlyWrite: true
+#      fail-max: 3
+
+# RocketMQ
+rocketmq:
+  # NameServer地址
+  name-server: localhost:9876
+  # 生产者参数配置
+  producer:
+    group: group-1
+    sendMessageTimeout: 300000
+    compress-message-body-threshold: 4096
+    max-message-size: 4194304
+    retry-times-when-send-async-failed: 0
+    retry-next-server: true
+    retry-times-when-send-failed: 2
+    topic: topic-sample
+  # 消费者参数配置
+  consumer:
+    topic: topic-sample
+  # 对接其他rmq集群的NameServer
+  anotherRMQ: 192.168.0.123:9876
+
+# 日志打印级别
+logging:
+  level:
+    root: info
+---
+spring:
+  profiles: prod
+  datasource:
+    driverClassName: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://192.168.0.17:3306/spring_sample?useUnicode=true&characterEncoding=utf-8
+    username: root
+    password: Acrel_!@#123
+  data:
+    mongodb:
+      uri: mongodb://172.16.250.76:27017,172.16.250.77:27017/test?safe=true&maxPoolSize=500&minPoolSize=10
+  redis:
+    mode: cluster
+    database: 0
+    timeout: 3000
+    password: 123456
+    cluster:
+      nodes: 172.16.250.76:7001,172.16.250.76:7002,172.16.250.76:7003,172.16.250.77:7001,172.16.250.77:7002,172.16.250.77:7003
+    lettuce:
+      pool:
+        max-idle: 50
+        min-idle: 10
+        max-active: 100
+        max-wait: 1000
+    redisson:
+      max-idle: 50
+      min-idle: 10
+      max-active: 100
+      max-wait: 1000
+      conn-timeout: 3000
+      so-timeout: 3000
+      size: 10
+      retry-attempts: 3
+      read-mode: SLAVE
+      scan-interval: 1000
+      failed-attempts: 3
+      slave-connection-pool-size: 64
+      master-connection-pool-size: 64
+
+rocketmq:
+  name-server: 172.16.250.76:9876;172.16.250.77:9876
+  producer:
+    group: group-1
+    sendMessageTimeout: 300000
+    compress-message-body-threshold: 4096
+    max-message-size: 4194304
+    retry-times-when-send-async-failed: 0
+    retry-next-server: true
+    retry-times-when-send-failed: 2
+    topic: topic-sample
+  consumer:
+    topic: topic-sample
+  anotherRMQ: 192.168.0.123:9876
+
+logging:
+  level:
+    root: info

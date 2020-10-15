@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.acrel.mybatis.role.dao.RoleDAO">
+
+    <resultMap id="roleResultMap" type="com.acrel.entity.auth.Role">
+        <result property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="description" column="description"/>
+        <result property="createTime" column="create_time"/>
+        <result property="createUserId" column="create_user_id"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="updateUserId" column="update_user_id"/>
+        <result property="delFlag" column="del_flag" typeHandler="com.acrel.typehandler.EnumTypeHandler"/>
+    </resultMap>
+
+    <resultMap id="roleCascadeResultMap" type="com.acrel.entity.auth.Role">
+        <result property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="description" column="description"/>
+        <result property="createTime" column="create_time"/>
+        <result property="createUserId" column="create_user_id"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="updateUserId" column="update_user_id"/>
+        <collection property="userList" ofType="com.acrel.entity.auth.User">
+            <result property="id" column="user_id"/>
+            <result property="account" column="account"/>
+            <result property="name" column="user_name"/>
+            <result property="phone" column="phone"/>
+            <result property="email" column="email"/>
+            <result property="userType" column="user_type" typeHandler="com.acrel.typehandler.EnumTypeHandler"/>
+            <result property="alipayAccount" column="alipay_account"/>
+            <result property="wechatAccount" column="wechat_account"/>
+            <result property="state" column="state" typeHandler="com.acrel.typehandler.EnumTypeHandler"/>
+        </collection>
+    </resultMap>
+
+    <sql id="columns">
+        id, name, description,  create_time, create_user_id, update_time, update_user_id, del_flag
+    </sql>
+
+    <insert id="insert">
+        INSERT INTO auth_role (name, description,  create_time, create_user_id, update_time, update_user_id, del_flag)
+        VALUES (#{name}, #{description},  #{createTime}, #{createUserId}, #{updateTime}, #{updateUserId}, #{delFlag.code})
+    </insert>
+
+    <update id="update">
+        UPDATE auth_role
+        <set>
+            <if test="name != null">name = #{name},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="updateUserId != null">update_user_id = #{updateUserId},</if>
+            <if test="delFlag != null">del_flag = #{delFlag.code},</if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <delete id="delete">
+        DELETE
+        FROM auth_role
+        WHERE id = #{id}
+    </delete>
+
+    <select id="get" resultMap="roleResultMap">
+        SELECT
+        <include refid="columns"/>
+        FROM auth_role
+        WHERE id = #{id} AND del_flag = 0
+    </select>
+
+    <select id="list" parameterType="com.acrel.entity.auth.Role" resultMap="roleResultMap">
+        SELECT <include refid="columns"/>
+        FROM auth_role
+        <where>
+            del_flag = 0
+            <if test="name != null and name != ''">AND name LIKE CONCAT('%',#{name},'%')</if>
+        </where>
+        ORDER BY id
+    </select>
+
+    <select id="listCascade" parameterType="com.acrel.entity.auth.Role" resultMap="roleCascadeResultMap">
+        SELECT
+        r.*
+        u.id        AS user_id,
+        u.account,
+        u.name      AS user_name,
+        u.phone,
+        u.email,
+        u.user_type,
+        u.alipay_account,
+        u.wechat_account,
+        u.state
+        FROM auth_role r, auth_user u, auth_user_role ur
+        <where>
+            r.del_flag = 0
+            AND u.del_flag = 0
+            AND r.id = ur.role_id
+            AND ur.user_id = u.id
+            <if test="name != null and name != ''">AND r.name LIKE CONCAT('%',#{name},'%')</if>
+        </where>
+        ORDER BY r.id, u.id
+    </select>
+
+    <select id="listByPage" parameterType="com.acrel.entity.auth.Role" resultMap="roleResultMap">
+        SELECT <include refid="columns"/>
+        FROM auth_role
+        <where>
+            del_flag = 0
+            <if test="name != null and name != ''">AND name LIKE CONCAT('%',#{name},'%')</if>
+        </where>
+        ORDER BY id
+    </select>
+
+</mapper>
