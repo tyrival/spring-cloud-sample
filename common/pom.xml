@@ -11,7 +11,7 @@
 
     <parent>
         <groupId>com.acrel</groupId>
-        <artifactId>spring-cloud-root</artifactId>
+        <artifactId>spring-cloud-sample</artifactId>
         <version>1.0</version>
     </parent>
 
